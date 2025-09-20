@@ -11,7 +11,7 @@ function Colleges() {
   // filter states
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState("");
-  const [minRating, setMinRating] = useState(0.0);
+  const [minRating, setMinRating] = useState("0.0");
 
   const indianStates = [
     "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa",
@@ -94,14 +94,13 @@ function Colleges() {
   }, []);
 
   // Apply filters
-  const filteredColleges = colleges.filter(
-    (college) => {
-      return (
-        college.name.toLowerCase().includes(search.toLowerCase()) && (stateFilter ? college.state === stateFilter : true) 
-        && college.rating >= minRating
-      );
-    }
-  );
+  const filteredColleges = colleges.filter((college) => {
+    return (
+      college.name.toLowerCase().includes(search.toLowerCase()) &&
+      (stateFilter ? college.state === stateFilter : true) &&
+      (parseFloat(minRating) > 0 ? college.rating >= parseFloat(minRating) : true)
+    );
+  });
 
   // return
   return (
@@ -109,14 +108,14 @@ function Colleges() {
       <Navbar />
 
       <div className="container mx-auto flex-1 px-6 py-10">
-
         <h1 className="text-3xl font-heading font-bold mb-6">Explore Colleges</h1>
 
         {/* Filter section */}
         <div className="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-4">
-          <input 
+          {/* Search Filter */}
+          <input
             type="text"
-            placeholder="Search by name..." 
+            placeholder="Search by name..."
             className="border rounded px-3 py-2"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -128,42 +127,44 @@ function Colleges() {
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
           >
-
             <option value="">All States</option>
-
-            {
-              indianStates.map((state) => (
-                <option key={state} value={state}>{state}</option>
-              ))
-            }
-
+            {indianStates.map((state) => (
+              <option key={state} value={state}>{state}</option>
+            ))}
           </select>
 
           {/* Rating Filter */}
           <select
             className="border rounded px-3 py-2"
             value={minRating}
-            onChange={(e) => setStateFilter(e.target.value)}
+            onChange={(e) => setMinRating(e.target.value)}
           >
-
             <option value="0.0">All Ratings</option>
-
-            {
-              ratings.map((r) => (
-                <option key={r} value={r}>{r}</option>
-              ))
-            }
-
+            {ratings.map((r) => (
+              <option key={r} value={r}>{r} & up</option>
+            ))}
           </select>
+
+          {/* Clear Filters */}
+          <button
+            onClick={() => {
+              setSearch("");
+              setStateFilter("");
+              setMinRating("0.0");
+            }}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+          >
+            Clear Filters
+          </button>
         </div>
 
         {loading ? (
           <p className="text-lightText">Loading colleges...</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {colleges.map((college) => (
+            {filteredColleges.map((college) => (
               <CollegeCard key={college.id} college={college} />
-            ) )}
+            ))}
           </div>
         )}
       </div>

@@ -1,57 +1,23 @@
 import { useState } from "react";
+import { useColleges } from "../../context/CollegesContext";
 
 function ManageColleges() {
-  const [colleges, setColleges] = useState([
-    { id: 1, name: "NLSIU Bangalore" },
-    { id: 2, name: "NALSAR Hyderabad" },
-    { id: 3, name: "NLU Delhi" },
-  ]);
-
+  const { colleges, addCollege, deleteCollege, updateCollege } = useColleges();
   const [newCollege, setNewCollege] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [editValue, setEditValue] = useState("");
 
-  const addCollege = () => {
-    if (!newCollege.trim()) return;
-    setColleges([...colleges, { id: Date.now(), name: newCollege }]);
-    setNewCollege("");
-  };
-
-  const deleteCollege = (id) => {
-    setColleges(colleges.filter((c) => c.id !== id));
-  };
-
-  const startEdit = (id, currentName) => {
-    setEditingId(id);
-    setEditValue(currentName);
-  };
-
-  const saveEdit = (id) => {
-    setColleges(
-      colleges.map((c) =>
-        c.id === id ? { ...c, name: editValue } : c
-      )
-    );
-    setEditingId(null);
-    setEditValue("");
-  };
-
   return (
     <div>
       <h2 className="text-2xl font-bold mb-4">Manage Colleges</h2>
-
-      {/* List */}
-      <ul className="space-y-2">
+      <ul>
         {colleges.map((c) => (
-          <li
-            key={c.id}
-            className="p-3 bg-white rounded shadow flex justify-between"
-          >
+          <li key={c.id} className="flex justify-between bg-white p-2 my-2 rounded">
             {editingId === c.id ? (
               <input
                 value={editValue}
                 onChange={(e) => setEditValue(e.target.value)}
-                className="border p-1 rounded"
+                className="border p-1"
               />
             ) : (
               <span>{c.name}</span>
@@ -59,22 +25,29 @@ function ManageColleges() {
             <div className="space-x-2">
               {editingId === c.id ? (
                 <button
-                  onClick={() => saveEdit(c.id)}
-                  className="px-2 py-1 bg-green-500 text-white text-sm rounded"
+                  onClick={() => {
+                    updateCollege(c.id, { name: editValue });
+                    setEditingId(null);
+                    setEditValue("");
+                  }}
+                  className="bg-green-500 text-white px-2 py-1 rounded"
                 >
                   Save
                 </button>
               ) : (
                 <button
-                  onClick={() => startEdit(c.id, c.name)}
-                  className="px-2 py-1 bg-yellow-400 text-sm rounded"
+                  onClick={() => {
+                    setEditingId(c.id);
+                    setEditValue(c.name);
+                  }}
+                  className="bg-yellow-400 px-2 py-1 rounded"
                 >
                   Edit
                 </button>
               )}
               <button
                 onClick={() => deleteCollege(c.id)}
-                className="px-2 py-1 bg-red-500 text-white text-sm rounded"
+                className="bg-red-500 text-white px-2 py-1 rounded"
               >
                 Delete
               </button>
@@ -83,17 +56,20 @@ function ManageColleges() {
         ))}
       </ul>
 
-      {/* Add new */}
-      <div className="mt-4 flex space-x-2">
+      {/* Add new college */}
+      <div className="mt-4">
         <input
           value={newCollege}
           onChange={(e) => setNewCollege(e.target.value)}
-          placeholder="New college name"
-          className="border p-2 rounded w-full"
+          placeholder="New college"
+          className="border p-2 rounded"
         />
         <button
-          onClick={addCollege}
-          className="px-4 py-2 bg-green-600 text-white rounded"
+          onClick={() => {
+            addCollege({ name: newCollege });
+            setNewCollege("");
+          }}
+          className="ml-2 px-4 py-2 bg-green-600 text-white rounded"
         >
           Add
         </button>

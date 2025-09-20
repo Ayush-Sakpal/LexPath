@@ -1,80 +1,58 @@
 import { useState } from "react";
+import { useJobs } from "../../context/JobsContext";
 
 function ManageJobs() {
-  const [jobs, setJobs] = useState([
-    { id: 1, title: "Intern at Law Firm A" },
-    { id: 2, title: "Junior Associate at Firm B" },
-    { id: 3, title: "Legal Research Assistant" },
-  ]);
-
-  const [newJob, setNewJob] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [editValue, setEditValue] = useState("");
+  const { jobs, setJobs } = useJobs();
+  const [newJob, setNewJob] = useState({
+    title: "",
+    organisation: "",
+    location: "",
+    role_type: "",
+    apply_url: "",
+  });
 
   const addJob = () => {
-    if (!newJob.trim()) return;
-    setJobs([...jobs, { id: Date.now(), title: newJob }]);
-    setNewJob("");
+    if (!newJob.title || !newJob.organisation) return;
+    setJobs([...jobs, { ...newJob, id: Date.now() }]);
+    setNewJob({ title: "", organisation: "", location: "", role_type: "", apply_url: "" });
   };
 
-  const deleteJob = (id) => {
-    setJobs(jobs.filter((j) => j.id !== id));
-  };
-
-  const startEdit = (id, currentTitle) => {
-    setEditingId(id);
-    setEditValue(currentTitle);
-  };
-
-  const saveEdit = (id) => {
-    setJobs(
-      jobs.map((j) =>
-        j.id === id ? { ...j, title: editValue } : j
-      )
-    );
-    setEditingId(null);
-    setEditValue("");
-  };
+  const deleteJob = (id) => setJobs(jobs.filter((j) => j.id !== id));
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Manage Jobs</h2>
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Manage Jobs</h1>
 
-      <ul className="space-y-2">
-        {jobs.map((j) => (
-          <li key={j.id} className="p-3 bg-white rounded shadow flex justify-between">
-            {editingId === j.id ? (
-              <input
-                value={editValue}
-                onChange={(e) => setEditValue(e.target.value)}
-                className="border p-1 rounded"
-              />
-            ) : (
-              <span>{j.title}</span>
-            )}
-            <div className="space-x-2">
-              {editingId === j.id ? (
-                <button onClick={() => saveEdit(j.id)} className="px-2 py-1 bg-green-500 text-white text-sm rounded">Save</button>
-              ) : (
-                <button onClick={() => startEdit(j.id, j.title)} className="px-2 py-1 bg-yellow-400 text-sm rounded">Edit</button>
-              )}
-              <button onClick={() => deleteJob(j.id)} className="px-2 py-1 bg-red-500 text-white text-sm rounded">Delete</button>
-            </div>
+      {/* Add Job */}
+      <div className="bg-gray-100 p-4 rounded mb-6">
+        <input
+          className="border p-2 mr-2"
+          placeholder="Title"
+          value={newJob.title}
+          onChange={(e) => setNewJob({ ...newJob, title: e.target.value })}
+        />
+        <input
+          className="border p-2 mr-2"
+          placeholder="Organisation"
+          value={newJob.organisation}
+          onChange={(e) => setNewJob({ ...newJob, organisation: e.target.value })}
+        />
+        <button onClick={addJob} className="bg-blue-600 text-white px-4 py-2 rounded">
+          Add Job
+        </button>
+      </div>
+
+      {/* Job List */}
+      <ul>
+        {jobs.map((job) => (
+          <li key={job.id} className="flex justify-between bg-white p-4 mb-2 rounded shadow">
+            <span>{job.title} @ {job.organisation}</span>
+            <button onClick={() => deleteJob(job.id)} className="text-red-500 hover:underline">
+              Delete
+            </button>
           </li>
         ))}
       </ul>
-
-      <div className="mt-4 flex space-x-2">
-        <input
-          value={newJob}
-          onChange={(e) => setNewJob(e.target.value)}
-          placeholder="New job title"
-          className="border p-2 rounded w-full"
-        />
-        <button onClick={addJob} className="px-4 py-2 bg-green-600 text-white rounded">
-          Add
-        </button>
-      </div>
     </div>
   );
 }
