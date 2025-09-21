@@ -7,24 +7,41 @@ import RecommendedJobs from '../components/dashboard/RecommendedJobs'
 import MockTestProgress from '../components/dashboard/MockTestProgress'
 import UpcomingExams from '../components/dashboard/UpcomingExams'
 import StudentProfileCard from '../components/dashboard/StudentProfileCard'
-import userDataFile from "../data/userData";
+import { useNavigate } from "react-router-dom";
 
 function Dashboard() {
 
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
-    setTimeout(() => {
-      setUserData(userDataFile); // replace with api.get('/dashboard') later
+    
+    const storedUser = localStorage.getItem("'user");
+
+    if(storedUser) {
+      setUserData(JSON.parse(storedUser));
       setLoading(false);
-    }, 1200); // fake 1.2s delay
+    }
+    else {
+      setLoading(false);
+      navigate("/login");
+    }
   }, []);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen text-xl">
         Loading dashboard...
+      </div>
+    );
+  }
+
+  if(!userData) {
+    return (
+      <div className="flex items-center justify-center h-screen text-xl">
+        No user found. Please log in again.
       </div>
     );
   }
