@@ -4,8 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 function Login() {
   const navigate = useNavigate();
-
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "", role: "" });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -13,22 +12,34 @@ function Login() {
     try {
       const res = await axios.post(
         "http://localhost:5000/api/auth/login",
-        form
+        form,
+        {
+          headers: {
+            "Content-Type": "application/json", // ✅ required for JSON
+          },
+        }
       );
 
+      // Save token and user
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("user", JSON.stringify(res.data.user));
 
       alert("Login Successful");
 
+      // Navigate based on role
       if (res.data.user.role === "admin") {
         navigate("/admin_dashboard", { replace: true });
       } else {
         navigate("/dashboard", { replace: true });
       }
 
+      console.log("Logged in user:", res.data.user);
+      console.log("Token:", res.data.token);
     } catch (err) {
-      alert(err.res.data.message);
+      console.error(err); // ✅ always log the error
+      const message =
+        err.response?.data?.message || "Login failed. Please try again.";
+      alert(message);
     }
   };
 
@@ -48,6 +59,7 @@ function Login() {
           className="border border-lightText/30 focus:ring-2 focus:ring-secondary rounded-md p-3 mb-4 w-full font-paragraph text-neutralText"
           value={form.email}
           onChange={(e) => setForm({ ...form, email: e.target.value })}
+          required
         />
 
         <input
@@ -56,6 +68,7 @@ function Login() {
           className="border border-lightText/30 focus:ring-2 focus:ring-secondary rounded-md p-3 mb-4 w-full font-paragraph text-neutralText"
           value={form.password}
           onChange={(e) => setForm({ ...form, password: e.target.value })}
+          required
         />
 
         {/* Role Dropdown */}
@@ -63,6 +76,7 @@ function Login() {
           className="border border-lightText/30 focus:ring-2 focus:ring-secondary rounded-md p-3 mb-6 w-full font-paragraph text-neutralText"
           value={form.role}
           onChange={(e) => setForm({ ...form, role: e.target.value })}
+          required
         >
           <option value="">Select Role</option>
           <option value="student">Student</option>
@@ -72,6 +86,17 @@ function Login() {
         <button className="bg-secondary hover:bg-secondary/90 text-white px-4 py-3 rounded-md w-full font-heading font-semibold transition">
           Login
         </button>
+
+        {/* 👇 Signup Redirect */}
+        <p className="text-center text-sm text-neutralText mt-4">
+          Not a user?{" "}
+          <span
+            onClick={() => navigate("/signup")}
+            className="text-secondary font-semibold cursor-pointer hover:underline"
+          >
+            Sign up
+          </span>
+        </p>
       </form>
     </div>
   );

@@ -1,6 +1,35 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
 function CollegeCard({ college }) {
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5000/api/users/save-college", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ collegeId: college.id }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message);
+
+      setSaved(true);
+    } catch (error) {
+      alert(error.message || "Failed to save college");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition cursor-pointer flex flex-col">
       
@@ -31,13 +60,27 @@ function CollegeCard({ college }) {
           Rating: {college.rating}
         </p>
 
-        {/* View details button */}
-        <Link
-          to={`/college/${college.id}`}
-          className="mt-auto inline-block text-secondary font-semibold hover:underline text-sm md:text-base"
-        >
-          View Details →
-        </Link>
+        {/* Actions */}
+        <div className="mt-auto flex items-center justify-between">
+          {/* View details */}
+          <Link
+            to={`/college/${college.id}`}
+            className="text-secondary font-semibold hover:underline text-sm md:text-base"
+          >
+            View Details →
+          </Link>
+
+          {/* Save button */}
+          <button
+            onClick={handleSave}
+            disabled={saving || saved}
+            className={`ml-3 px-3 py-1.5 rounded text-sm md:text-base font-medium transition 
+              ${saved ? "bg-green-500 text-white cursor-default" 
+                      : "bg-blue-500 hover:bg-blue-600 text-white"}`}
+          >
+            {saved ? "Saved" : saving ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
     </div>
   );

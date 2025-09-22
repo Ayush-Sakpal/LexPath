@@ -83,6 +83,17 @@ function Signup() {
         <button className="bg-secondary hover:bg-secondary/90 text-white px-4 py-3 rounded-md w-full font-heading font-semibold transition">
           Signup
         </button>
+
+        {/* 👇 Login Redirect */}
+        <p className="text-center text-sm text-neutralText mt-4">
+          Already a user?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-secondary font-semibold cursor-pointer hover:underline"
+          >
+            Login
+          </span>
+        </p>
       </form>
     </div>
   );

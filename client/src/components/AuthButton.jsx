@@ -1,15 +1,28 @@
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-function AuthButton(props) {
+function AuthButton() {
   const navigate = useNavigate();
+  const { user, logout } = useContext(AuthContext);
+
+  const handleClick = () => {
+    if (user) {
+      logout();
+      navigate("/login"); // Redirect after logout
+    } else {
+      navigate("/login"); // Redirect to login page
+    }
+  };
 
   return (
-    <button 
+    <button
       className="hover:cursor-pointer hover:bg-slate-700 border-2 border-white rounded px-4 py-2"
-      onClick={() => navigate(`/${props.name.toLowerCase()}`)}
+      onClick={handleClick}
     >
-      {props.name}
-  </button>);
+      {user ? "Logout" : "Login"}
+    </button>
+  );
 }
 
 export default AuthButton;

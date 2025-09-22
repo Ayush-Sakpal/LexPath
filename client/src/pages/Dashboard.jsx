@@ -18,7 +18,7 @@ function Dashboard() {
 
   useEffect(() => {
     
-    const storedUser = localStorage.getItem("'user");
+    const storedUser = localStorage.getItem("user");
 
     if(storedUser) {
       setUserData(JSON.parse(storedUser));

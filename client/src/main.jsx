@@ -6,17 +6,20 @@ import { CollegesProvider } from "./context/CollegesContext.jsx";
 import { JobsProvider } from "./context/JobsContext.jsx";
 import { ExamsProvider } from "./context/ExamsContext.jsx";
 import { CareersProvider } from "./context/CareersContext.jsx";
+import { AuthProvider } from "./context/AuthContext.jsx"; // ✅ import
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <CollegesProvider>
-      <JobsProvider>
-        <ExamsProvider>
-          <CareersProvider>
-            <App />
-          </CareersProvider>
-        </ExamsProvider>
-      </JobsProvider>
-    </CollegesProvider>
+    <AuthProvider>
+      <CollegesProvider>
+        <JobsProvider>
+          <ExamsProvider>
+            <CareersProvider>
+              <App />
+            </CareersProvider>
+          </ExamsProvider>
+        </JobsProvider>
+      </CollegesProvider>
+    </AuthProvider>
   </StrictMode>
 );

@@ -1,16 +1,16 @@
 import { verifyToken } from "../utils/jwt.js";
 
-export const authMiddleware = (req, res, next) => {
+export const protect = (req, res, next) => {
   const authHeader = req.headers['authorization'];
 
-  if(!authHeader) {
-    return res.status(401).json({message: "No token provided"});
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
   }
 
   const token = authHeader.split(" ")[1]; // Bearer token
 
-  if(!token) {
-    return res.status(401).json({message: "Invalid token format"});
+  if (!token) {
+    return res.status(401).json({ message: "Invalid token format" });
   }
 
   const decoded = verifyToken(token);
@@ -18,4 +18,12 @@ export const authMiddleware = (req, res, next) => {
 
   req.user = decoded; // attach user info to request
   next();
-}
+};
+
+export const adminOnly = (req, res, next) => {
+  if (req.user?.role === "admin") {
+    next();
+  } else {
+    res.status(403).json({ message: "Admin access only" });
+  }
+};
