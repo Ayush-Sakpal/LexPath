@@ -3,10 +3,10 @@ import pool from "../config/db.js";
 // ===== Get All Colleges =====
 export const getColleges = async (req, res) => {
   try {
-    const result = await pool.query("SELECT * FROM colleges ORDER BY created_at DESC");
+    const result = await pool.query("SELECT * FROM colleges ORDER BY id DESC");
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 };
 
@@ -18,7 +18,7 @@ export const getCollegeById = async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ message: "College not found" });
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 };
 
@@ -32,6 +32,9 @@ export const createCollege = async (req, res) => {
       admission_process, fees_structure, logo_url, images
     } = req.body;
 
+    // Fields that should be JSON
+    const jsonFields = { courses_offered, facilities, placement_info, fees_structure, images };
+
     const result = await pool.query(
       `INSERT INTO colleges
       (name, type, location, city, state, country, established_year,
@@ -44,16 +47,21 @@ export const createCollege = async (req, res) => {
       RETURNING *`,
       [
         name, type, location, city, state, country, established_year,
-        affiliation, accreditation, ranking, JSON.stringify(courses_offered || []),
+        affiliation, accreditation, ranking,
+        JSON.stringify(courses_offered || []),
         website, contact_email, contact_phone, description,
-        JSON.stringify(facilities || {}), JSON.stringify(placement_info || {}),
-        admission_process, JSON.stringify(fees_structure || {}), logo_url,
+        JSON.stringify(facilities || {}),
+        JSON.stringify(placement_info || {}),
+        admission_process,
+        JSON.stringify(fees_structure || {}),
+        logo_url,
         JSON.stringify(images || [])
       ]
     );
+
     res.status(201).json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 };
 
@@ -61,20 +69,26 @@ export const createCollege = async (req, res) => {
 export const updateCollege = async (req, res) => {
   try {
     const { id } = req.params;
+    const jsonFields = ["courses_offered", "facilities", "placement_info", "fees_structure", "images"];
+
     const fields = Object.keys(req.body);
-    const values = Object.values(req.body);
+    if (fields.length === 0) return res.status(400).json({ message: "No fields provided to update" });
+
+    const values = Object.entries(req.body).map(([key, value]) =>
+      jsonFields.includes(key) ? JSON.stringify(value) : value
+    );
 
     const setClause = fields.map((f, i) =>
-      `${f} = $${i + 1}${["courses_offered", "facilities", "placement_info", "fees_structure", "images"].includes(f) ? "::jsonb" : ""}`
+      `${f} = $${i + 1}${jsonFields.includes(f) ? "::jsonb" : ""}`
     ).join(", ");
 
-    const query = `UPDATE colleges SET ${setClause} WHERE id = $${fields.length + 1} RETURNING *`;
+    const query = `UPDATE colleges SET ${setClause}, updated_at = NOW() WHERE id = $${fields.length + 1} RETURNING *`;
     const result = await pool.query(query, [...values, id]);
 
     if (result.rows.length === 0) return res.status(404).json({ message: "College not found" });
     res.json(result.rows[0]);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 };
 
@@ -86,6 +100,6 @@ export const deleteCollege = async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ message: "College not found" });
     res.json({ message: "College deleted" });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ error: "Internal Server Error", details: err.message });
   }
 };

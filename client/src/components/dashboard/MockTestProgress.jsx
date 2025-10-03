@@ -1,19 +1,27 @@
 function MockTestProgress({ tests }) {
-  return (
-    <div className="bg-white p-4 rounded shadow">
-      <h3 className="text-xl font-bold font-heading mb-4">Mock Test Progress</h3>
+  const safeTests = Array.isArray(tests) ? tests : [];
 
-      {(!tests || tests.length === 0) ? (
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">Mock Test Progress</h2>
+
+      {safeTests.length === 0 ? (
         <p>No mock test progress available.</p>
       ) : (
-        <ul className="space-y-2">
-          {tests.map((item) => (
-            <li key={item.id} className="border-b pb-2">
-              <p className="font-semibold">{item.test}</p>
-              <p className="text-sm text-neutralText">{item.score}</p>
-            </li>
+        <div className="flex flex-wrap gap-4">
+          {safeTests.map((item) => (
+            <div
+              key={item.id}
+              className="bg-white shadow rounded p-4 w-72 flex flex-col justify-between hover:shadow-lg transition"
+            >
+              <p className="font-semibold text-lg">{item.test}</p>
+              <p className="text-sm text-neutralText mt-1">Score: {item.score}</p>
+              {item.date && (
+                <p className="text-sm text-neutralText mt-1">Date: {item.date}</p>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

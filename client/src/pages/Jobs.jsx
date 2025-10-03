@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-// import api from "../lib/api";
+import { useEffect, useState, useRef } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import JobCard from "../components/JobCard";
+import axios from "axios";
 
 function Jobs() {
   const [jobs, setJobs] = useState([]);
@@ -10,78 +10,25 @@ function Jobs() {
 
   // Filters
   const [search, setSearch] = useState("");
-  const [location, setLocation] = useState("");
-  const [roleType, setRoleType] = useState("");
+  const [industryFilter, setIndustryFilter] = useState("");
+  const [experienceFilter, setExperienceFilter] = useState("");
+  const [skillsFilter, setSkillsFilter] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [skillsDropdownOpen, setSkillsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
-  // Full list of states
-  const indianStates = [
-    "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa",
-    "Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala",
-    "Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland",
-    "Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura",
-    "Uttar Pradesh","Uttarakhand","West Bengal","Andaman and Nicobar Islands",
-    "Chandigarh","Dadra and Nagar Haveli and Daman and Diu","Delhi",
-    "Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"
-  ];
-
-  // Comprehensive role types
-  const roleTypes = [
-    "Internship",
-    "Full-time",
-    "Part-time",
-    "Contract",
-    "Freelance",
-    "Temporary",
-    "Volunteer",
-    "Remote"
-  ];
-
-
-  // Hardcoded jobs
-  const hardcodedJobs = [
-    {
-      id: 1,
-      title: "Legal Intern",
-      organisation: "Khaitan & Co",
-      location: "Mumbai, Maharashtra",
-      role_type: "Internship",
-      apply_url: "https://example.com/apply/khaitan-internship",
-    },
-    {
-      id: 2,
-      title: "Junior Associate",
-      organisation: "Trilegal",
-      location: "New Delhi, Delhi",
-      role_type: "Full-time",
-      apply_url: "https://example.com/apply/trilegal-associate",
-    },
-    {
-      id: 3,
-      title: "Research Intern",
-      organisation: "National Law University Delhi",
-      location: "Delhi",
-      role_type: "Internship",
-      apply_url: "https://example.com/apply/nlu-research",
-    },
-    {
-      id: 4,
-      title: "Paralegal",
-      organisation: "AZB & Partners",
-      location: "Bangalore, Karnataka",
-      role_type: "Full-time",
-      apply_url: "https://example.com/apply/azb-paralegal",
-    },
-  ];
+  // Sample options
+  const industryOptions = ["Law", "Finance", "IT", "Education", "Business", "Consulting"];
+  const experienceOptions = ["Intern", "Fresher", "Experienced"];
+  const skillsOptions = ["Research", "Writing", "Negotiation", "Communication", "Analysis", "Leadership"];
 
   useEffect(() => {
     async function fetchJobs() {
       try {
-        // const res = await api.get("/jobs");
-        // setJobs(res.data);
-
-      setJobs(hardcodedJobs);
+        const res = await axios.get("http://localhost:5000/api/jobs");
+        setJobs(res.data);
       } catch (err) {
-        console.log(err);
+        console.error("Error fetching jobs:", err);
       } finally {
         setLoading(false);
       }
@@ -90,103 +37,147 @@ function Jobs() {
     fetchJobs();
   }, []);
 
-  const filteredJobs = jobs.filter(
-    (job) =>
-      (job.title.toLowerCase().includes(search.toLowerCase()) ||
-        job.organisation.toLowerCase().includes(search.toLowerCase())) &&
-      (location ? job.location === location : true) &&
-      (roleType ? job.role_type === roleType : true)
+  const toggleSkill = (skill) => {
+    setSkillsFilter(prev =>
+      prev.includes(skill) ? prev.filter(s => s !== skill) : [...prev, skill]
+    );
+  };
+
+  // Close skills dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setSkillsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredJobs = jobs.filter(job =>
+    (job.title.toLowerCase().includes(search.toLowerCase()) ||
+     job.organisation.toLowerCase().includes(search.toLowerCase())) &&
+    (!industryFilter || job.industry === industryFilter) &&
+    (!experienceFilter || job.experience_level === experienceFilter) &&
+    (skillsFilter.length === 0 || skillsFilter.every(skill => (job.skills_required || []).includes(skill)))
   );
 
   const clearFilters = () => {
     setSearch("");
-    setLocation("");
-    setRoleType("");
+    setIndustryFilter("");
+    setExperienceFilter("");
+    setSkillsFilter([]);
   };
 
   return (
     <div className="bg-background min-h-screen flex flex-col">
-
-      <Navbar/>
-
+      <Navbar />
       <div className="container mx-auto flex-1 px-6 py-10">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-heading font-bold">Jobs & Internships</h1>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={() => setDrawerOpen(true)}
+          >
+            Filters
+          </button>
+        </div>
 
-        <h1 className="font-heading text-3xl font-bold mb-6">Jobs & Internships</h1>
+        <input
+          type="text"
+          placeholder="Search jobs..."
+          className="border rounded px-3 py-2 w-full mb-4"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-        {/* Filters */}
-        <div className="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-4 items-center">
-          <input
-            type="text"
-            placeholder="Search jobs..."
-            className="border rounded px-3 py-2"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        {loading ? (
+          <p className="text-neutralText">Loading jobs...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredJobs.length > 0 ? (
+              filteredJobs.map(job => <JobCard key={job.id} job={job} />)
+            ) : (
+              <p className="text-gray-600">No jobs found.</p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform z-50
+                    ${drawerOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="p-6 flex flex-col h-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Filters</h2>
+            <button className="text-red-500 font-bold" onClick={() => setDrawerOpen(false)}>
+              ✕
+            </button>
+          </div>
 
           <select
-            className="border rounded px-3 py-2"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            className="border rounded px-3 py-2 mb-3"
+            value={industryFilter}
+            onChange={(e) => setIndustryFilter(e.target.value)}
           >
-            <option value="">All Locations</option>
-            {indianStates.map((state) => (
-              <option key={state} value={state}>
-                {state}
-              </option>
-            ))}
+            <option value="">All Industries</option>
+            {industryOptions.map(f => <option key={f} value={f}>{f}</option>)}
           </select>
 
           <select
-            className="border rounded px-3 py-2"
-            value={roleType}
-            onChange={(e) => setRoleType(e.target.value)}
+            className="border rounded px-3 py-2 mb-3"
+            value={experienceFilter}
+            onChange={(e) => setExperienceFilter(e.target.value)}
           >
-            <option value="">All Roles</option>
-            {roleTypes.map((role) => (
-              <option key={role} value={role}>
-                {role}
-              </option>
-            ))}
+            <option value="">All Experience Levels</option>
+            {experienceOptions.map(exp => <option key={exp} value={exp}>{exp}</option>)}
           </select>
+
+          {/* Skills multi-select */}
+          <div className="relative mb-3" ref={dropdownRef}>
+            <button
+              className="border rounded px-3 py-2 w-full text-left"
+              onClick={() => setSkillsDropdownOpen(!skillsDropdownOpen)}
+            >
+              {skillsFilter.length === 0 ? "All Skills" : skillsFilter.join(", ")}
+            </button>
+            {skillsDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-auto border rounded bg-white shadow">
+                {skillsOptions.map(skill => (
+                  <label key={skill} className="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={skillsFilter.includes(skill)}
+                      onChange={() => toggleSkill(skill)}
+                      className="mr-2"
+                    />
+                    {skill}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
 
           <button
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
             onClick={clearFilters}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mt-auto"
           >
             Clear Filters
           </button>
         </div>
-
-        {
-          loading ? 
-          (
-            <p className="text-neutralText">Loading jobs...</p>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredJobs.length > 0 ? (
-              filteredJobs.map((job) => (
-                <div key={job.id} className="bg-white p-6 rounded shadow hover:shadow-lg transition">
-                  <h2 className="text-xl font-bold">{job.title}</h2>
-                  <p className="text-gray-600">{job.organisation}</p>
-                  <p className="text-sm mt-2">{job.location}</p>
-                  <p className="text-sm mt-2">{job.role_type}</p>
-                  <a
-                    href={job.apply_url}
-                    className="mt-4 inline-block text-blue-600 hover:underline"
-                  >
-                    Apply Now →
-                  </a>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-600">No jobs found.</p>
-            )}
-            </div>
-          )
-        }
       </div>
 
-      <Footer/>
+      {/* Overlay */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-30 z-40"
+          onClick={() => setDrawerOpen(false)}
+        ></div>
+      )}
+
+      <Footer />
     </div>
   );
 }

@@ -4,9 +4,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 
 export const generateToken = (user) => {
   return jwt.sign(
-    {id: user.id, email: user.email},
+    {id: user.id, role: user.role, email: user.email},
     JWT_SECRET,
-    {expires: "1h"}
+    {expiresIn: "1h"}
   );
 };
 

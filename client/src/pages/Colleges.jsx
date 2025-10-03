@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-// import api from "../lib/api";
+import { useEffect, useState, useRef } from "react";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import CollegeCard from "../components/CollegeCard";
@@ -8,10 +7,18 @@ function Colleges() {
   const [colleges, setColleges] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // filter states
+  // Filters
   const [search, setSearch] = useState("");
   const [stateFilter, setStateFilter] = useState("");
+  const [cityFilter, setCityFilter] = useState("");
+  const [typeFilter, setTypeFilter] = useState("");
   const [minRating, setMinRating] = useState("0.0");
+  const [maxDuration, setMaxDuration] = useState("");
+  const [selectedCourses, setSelectedCourses] = useState([]);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [coursesDropdownOpen, setCoursesDropdownOpen] = useState(false);
+
+  const dropdownRef = useRef(null);
 
   const indianStates = [
     "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa",
@@ -24,150 +31,193 @@ function Colleges() {
   ];
 
   const ratings = Array.from({ length: 11 }, (_, i) => (i * 0.5).toFixed(1));
-
-  // Hardcoded colleges (temporary until backend is ready)
-  const hardcodedColleges = [
-    {
-      id: 1,
-      name: "National Law School of India University",
-      city: "Bangalore",
-      state: "Karnataka",
-      duration: 5,
-      rating: 4.9,
-      image_url: "https://assets.telegraphindia.com/telegraph/2021/Nov/1635938068_nlsiu-resized.jpg"
-    },
-    {
-      id: 2,
-      name: "NALSAR University of Law",
-      city: "Hyderabad",
-      state: "Telangana",
-      duration: 5,
-      rating: 4.7,
-      image_url: "https://assets.telegraphindia.com/telegraph/2021/Nov/1635938068_nlsiu-resized.jpg"
-    },
-    {
-      id: 3,
-      name: "National Law University Delhi",
-      city: "New Delhi",
-      state: "Delhi",
-      duration: 5,
-      rating: 4.8,
-      image_url: "https://assets.telegraphindia.com/telegraph/2021/Nov/1635938068_nlsiu-resized.jpg"
-    },
-    {
-      id: 4,
-      name: "Gujarat National Law University",
-      city: "Gandhinagar",
-      state: "Gujarat",
-      duration: 5,
-      rating: 4.6,
-      image_url: "https://assets.telegraphindia.com/telegraph/2021/Nov/1635938068_nlsiu-resized.jpg"
-    },
-    {
-      id: 5,
-      name: "National Law University Jodhpur",
-      city: "Jodhpur",
-      state: "Rajasthan",
-      duration: 5,
-      rating: 4.5,
-      image_url: "https://assets.telegraphindia.com/telegraph/2021/Nov/1635938068_nlsiu-resized.jpg"
-    },
-  ];
+  const types = ["Public", "Private"];
 
   useEffect(() => {
     async function fetchColleges() {
       try {
-        // const response = await api.get("/colleges");
-        // setColleges(response.data);
-
-        setColleges(hardcodedColleges); // Using hardcoded data for now
-      }
-      catch (error) {
+        const res = await fetch("http://localhost:5000/api/colleges");
+        if (!res.ok) throw new Error("Failed to fetch colleges");
+        const data = await res.json();
+        setColleges(data);
+      } catch (error) {
         console.error("Error fetching colleges:", error);
-      }
-      finally {
+        alert("Error fetching colleges. Check backend.");
+      } finally {
         setLoading(false);
       }
     }
-
     fetchColleges();
   }, []);
 
-  // Apply filters
-  const filteredColleges = colleges.filter((college) => {
-    return (
-      college.name.toLowerCase().includes(search.toLowerCase()) &&
-      (stateFilter ? college.state === stateFilter : true) &&
-      (parseFloat(minRating) > 0 ? college.rating >= parseFloat(minRating) : true)
-    );
-  });
+  // Unique cities & courses
+  const uniqueCities = Array.from(new Set(colleges.map(c => c.city))).sort();
+  const allCourses = Array.from(new Set(colleges.flatMap(c => c.courses_offered || []))).sort();
 
-  // return
+  const toggleCourse = (course) => {
+    setSelectedCourses(prev =>
+      prev.includes(course) ? prev.filter(c => c !== course) : [...prev, course]
+    );
+  }
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setCoursesDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredColleges = colleges.filter(college =>
+    college.name.toLowerCase().includes(search.toLowerCase()) &&
+    (!stateFilter || college.state === stateFilter) &&
+    (!cityFilter || college.city.toLowerCase() === cityFilter.toLowerCase()) &&
+    (!typeFilter || college.type === typeFilter) &&
+    (parseFloat(minRating) <= 0 || college.rating >= parseFloat(minRating)) &&
+    (!maxDuration || college.duration <= parseInt(maxDuration)) &&
+    (selectedCourses.length === 0 || selectedCourses.every(course => (college.courses_offered || []).includes(course)))
+  );
+
   return (
     <div className="bg-background min-h-screen flex flex-col">
       <Navbar />
-
       <div className="container mx-auto flex-1 px-6 py-10">
-        <h1 className="text-3xl font-heading font-bold mb-6">Explore Colleges</h1>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-heading font-bold">Explore Colleges</h1>
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            onClick={() => setDrawerOpen(true)}
+          >
+            Filters
+          </button>
+        </div>
 
-        {/* Filter section */}
-        <div className="bg-white p-4 rounded shadow mb-6 flex flex-wrap gap-4">
-          {/* Search Filter */}
-          <input
-            type="text"
-            placeholder="Search by name..."
-            className="border rounded px-3 py-2"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <input
+          type="text"
+          placeholder="Search by name..."
+          className="border rounded px-3 py-2 w-full mb-4"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-          {/* State Filter */}
+        {loading ? (
+          <p className="text-lightText">Loading colleges...</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredColleges.map(college => (
+              <CollegeCard key={college.id} college={college} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Drawer */}
+      <div
+        className={`fixed top-0 right-0 h-full w-80 bg-white shadow-lg transform transition-transform z-50
+                    ${drawerOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="p-6 flex flex-col h-full">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Filters</h2>
+            <button className="text-red-500 font-bold" onClick={() => setDrawerOpen(false)}>
+              ✕
+            </button>
+          </div>
+
           <select
-            className="border rounded px-3 py-2"
+            className="border rounded px-3 py-2 mb-3"
             value={stateFilter}
             onChange={(e) => setStateFilter(e.target.value)}
           >
             <option value="">All States</option>
-            {indianStates.map((state) => (
+            {indianStates.map(state => (
               <option key={state} value={state}>{state}</option>
             ))}
           </select>
 
-          {/* Rating Filter */}
           <select
-            className="border rounded px-3 py-2"
+            className="border rounded px-3 py-2 mb-3"
+            value={cityFilter}
+            onChange={(e) => setCityFilter(e.target.value)}
+          >
+            <option value="">All Cities</option>
+            {uniqueCities.map(city => (
+              <option key={city} value={city}>{city}</option>
+            ))}
+          </select>
+
+          <select
+            className="border rounded px-3 py-2 mb-3"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+          >
+            <option value="">All Types</option>
+            {types.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <select
+            className="border rounded px-3 py-2 mb-3"
             value={minRating}
             onChange={(e) => setMinRating(e.target.value)}
           >
             <option value="0.0">All Ratings</option>
-            {ratings.map((r) => (
-              <option key={r} value={r}>{r} & up</option>
-            ))}
+            {ratings.map(r => <option key={r} value={r}>{r} & up</option>)}
           </select>
 
-          {/* Clear Filters */}
+          <input
+            type="number"
+            placeholder="Max Duration (years)"
+            className="border rounded px-3 py-2 mb-3"
+            value={maxDuration}
+            onChange={(e) => setMaxDuration(e.target.value)}
+          />
+
+          <div className="relative mb-3" ref={dropdownRef}>
+            <button
+              className="border rounded px-3 py-2 w-full text-left"
+              onClick={() => setCoursesDropdownOpen(!coursesDropdownOpen)}
+            >
+              {selectedCourses.length === 0 ? "All Courses" : selectedCourses.join(", ")}
+            </button>
+            {coursesDropdownOpen && (
+              <div className="absolute z-50 mt-1 w-full max-h-60 overflow-auto border rounded bg-white shadow">
+                {allCourses.map(course => (
+                  <label key={course} className="flex items-center px-2 py-1 hover:bg-gray-100 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedCourses.includes(course)}
+                      onChange={() => toggleCourse(course)}
+                      className="mr-2"
+                    />
+                    {course}
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => {
-              setSearch("");
-              setStateFilter("");
-              setMinRating("0.0");
+              setStateFilter(""); setCityFilter(""); setTypeFilter("");
+              setMinRating("0.0"); setMaxDuration(""); setSelectedCourses([]);
             }}
             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
             Clear Filters
           </button>
         </div>
-
-        {loading ? (
-          <p className="text-lightText">Loading colleges...</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredColleges.map((college) => (
-              <CollegeCard key={college.id} college={college} />
-            ))}
-          </div>
-        )}
       </div>
+
+      {/* Overlay */}
+      {drawerOpen && (
+        <div
+          className="fixed inset-0 bg-black opacity-30 z-40"
+          onClick={() => setDrawerOpen(false)}
+        ></div>
+      )}
 
       <Footer />
     </div>

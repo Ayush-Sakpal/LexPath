@@ -10,6 +10,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
 import Signup from "./pages/Auth/Signup";
 import Login from "./pages/Auth/Login";
+import SearchResults from "./pages/SearchResults";
+import CollegeDetails from "./pages/CollegeDetail";
 
 function App() {
   return (
@@ -18,6 +20,7 @@ function App() {
 
         {/* Public routes */}
         <Route path="/" element={<Home />} />
+        <Route path="/search" element={<SearchResults />} />
         <Route path="/colleges" element={<Colleges />} />
         <Route path="/careers" element={<Careers />} />
         <Route path="/jobs" element={<Jobs />} />
@@ -25,6 +28,9 @@ function App() {
         <Route path="/exams" element={<Exams/>} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/colleges/:id" element={<CollegeDetails />} />
+        {/* <Route path="/exams/:id" element={<ExamDetails />} />
+        <Route path="/careers/:id" element={<CareerDetails />} />  */}
 
         {/* Private routes */}
         <Route 

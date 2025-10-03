@@ -1,19 +1,36 @@
 function RecommendedJobs({ jobs }) {
-  return (
-    <div className="bg-white p-4 rounded shadow">
-      <h3 className="text-xl font-bold font-heading mb-4">Recommended Jobs</h3>
+  const safeJobs = Array.isArray(jobs) ? jobs : [];
 
-      {(!jobs || jobs.length === 0) ? (
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">Recommended Jobs</h2>
+
+      {safeJobs.length === 0 ? (
         <p>No recommended jobs.</p>
       ) : (
-        <ul className="space-y-2">
-          {jobs.map((job) => (
-            <li key={job.id} className="border-b pb-2">
-              <p className="font-semibold">{job.title}</p>
-              <p className="text-sm text-neutralText">{job.orgnisation}</p>
-            </li>
+        <div className="flex flex-wrap gap-4">
+          {safeJobs.map((job) => (
+            <div
+              key={job.id}
+              className="bg-white shadow rounded p-4 w-72 flex flex-col justify-between hover:shadow-lg transition"
+            >
+              <div>
+                <p className="font-semibold text-lg">{job.title}</p>
+                <p className="text-sm text-neutralText mt-1">{job.organisation}</p>
+                <p className="text-sm text-neutralText mt-1">{job.location}</p>
+                <p className="text-sm text-neutralText mt-1">{job.role_type}</p>
+              </div>
+              <a
+                href={job.apply_url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 text-blue-600 hover:underline font-medium"
+              >
+                Apply Now →
+              </a>
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

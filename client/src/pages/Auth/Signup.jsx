@@ -84,7 +84,7 @@ function Signup() {
           Signup
         </button>
 
-        {/* 👇 Login Redirect */}
+        {/* Login Redirect */}
         <p className="text-center text-sm text-neutralText mt-4">
           Already a user?{" "}
           <span
@@ -92,6 +92,17 @@ function Signup() {
             className="text-secondary font-semibold cursor-pointer hover:underline"
           >
             Login
+          </span>
+        </p>
+
+        {/* Go Home Link */}
+        <p className="text-center text-sm text-neutralText mt-2">
+          Or{" "}
+          <span
+            onClick={() => navigate("/")}
+            className="text-secondary font-semibold cursor-pointer hover:underline"
+          >
+            go to Home
           </span>
         </p>
       </form>

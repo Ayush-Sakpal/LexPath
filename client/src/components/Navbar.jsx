@@ -6,9 +6,9 @@ function Navbar() {
   const { user } = useAuth();
 
   return (
-    <div className="bg-accentPrimary px-9 py-4 text-white shadow-xl sticky top-0">
+    <div className="bg-accentPrimary px-9 py-4 text-white shadow-xl sticky top-0 z-50">
       <ul className="flex justify-between items-center">
-        <div>
+        <div className="flex gap-2">
           <NavbarButton name="Home" to="/" />
           <NavbarButton name="Colleges" to="/colleges" />
           <NavbarButton name="Careers" to="/careers" />
@@ -21,12 +21,12 @@ function Navbar() {
           {user ? (
             <>
               <span className="font-semibold">Hi, {user.name}</span>
-              <AuthButton name="Logout" />
+              <AuthButton type="logout" />
             </>
           ) : (
             <>
-              <AuthButton name="Login" />
-              <AuthButton name="Signup" />
+              <AuthButton type="login" />
+              <AuthButton type="signup" />
             </>
           )}
         </div>

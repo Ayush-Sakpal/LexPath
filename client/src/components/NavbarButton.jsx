@@ -4,7 +4,7 @@ function NavbarButton({ name, to }) {
   return (
     <Link
       to={to}
-      className="hover:cursor-pointer hover:bg-slate-700 rounded px-4 py-2"
+      className="px-4 py-2 rounded hover:bg-white hover:text-accentPrimary font-medium transition"
     >
       {name}
     </Link>

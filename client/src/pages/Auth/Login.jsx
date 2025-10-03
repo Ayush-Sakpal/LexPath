@@ -15,7 +15,7 @@ function Login() {
         form,
         {
           headers: {
-            "Content-Type": "application/json", // ✅ required for JSON
+            "Content-Type": "application/json",
           },
         }
       );
@@ -32,11 +32,8 @@ function Login() {
       } else {
         navigate("/dashboard", { replace: true });
       }
-
-      console.log("Logged in user:", res.data.user);
-      console.log("Token:", res.data.token);
     } catch (err) {
-      console.error(err); // ✅ always log the error
+      console.error(err);
       const message =
         err.response?.data?.message || "Login failed. Please try again.";
       alert(message);
@@ -87,7 +84,7 @@ function Login() {
           Login
         </button>
 
-        {/* 👇 Signup Redirect */}
+        {/* Signup Redirect */}
         <p className="text-center text-sm text-neutralText mt-4">
           Not a user?{" "}
           <span
@@ -95,6 +92,17 @@ function Login() {
             className="text-secondary font-semibold cursor-pointer hover:underline"
           >
             Sign up
+          </span>
+        </p>
+
+        {/* Go Home Link */}
+        <p className="text-center text-sm text-neutralText mt-2">
+          Or{" "}
+          <span
+            onClick={() => navigate("/")}
+            className="text-secondary font-semibold cursor-pointer hover:underline"
+          >
+            go to Home
           </span>
         </p>
       </form>

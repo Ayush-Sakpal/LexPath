@@ -7,6 +7,7 @@ import jobRoutes from "./routes/jobs.js";
 import examRoutes from "./routes/exams.js";
 import careerRoutes from "./routes/careers.js";
 import userRoutes from './routes/userRoutes.js';
+import searchRoutes from "./routes/searchRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -29,6 +30,7 @@ app.use("/api/auth/verify", (req, res, next) => {
 });
 
 // Routes
+app.use("/api/search", searchRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/colleges", collegeRoutes);

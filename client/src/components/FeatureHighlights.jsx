@@ -1,14 +1,38 @@
+import { useNavigate } from "react-router-dom";
 import HighlightCard from "./HighlightCard";
-import { RiGraduationCapFill } from "react-icons/ri";
-import { RiRoadMapFill } from "react-icons/ri";
+import { RiGraduationCapFill, RiRoadMapFill } from "react-icons/ri";
 import { PiExamFill } from "react-icons/pi";
 
 function FeatureHighlights() {
-  return <div className="grid grid-cols-3 gap-12 my-4 mx-18">
-    <HighlightCard icon = {<RiGraduationCapFill className="h-full w-full text-accentPrimary"/>} title = {'Find Colleges'} />
-    <HighlightCard icon = {<RiRoadMapFill className="h-full w-full text-accentPrimary"/>} title = {'Career Roadmap'} />
-    <HighlightCard icon = {<PiExamFill className="h-full w-full text-accentPrimary"/>} title = {'Mock Tests'} />
-  </div>
+  const navigate = useNavigate();
+
+  return (
+    <section className="px-6 my-12">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-heading font-bold mb-8 text-center">
+          Explore Features
+        </h2>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
+          <HighlightCard
+            onClick={() => navigate("/colleges")}
+            icon={<RiGraduationCapFill className="h-full w-full text-accentPrimary" />}
+            title="Find Colleges"
+          />
+          <HighlightCard
+            onClick={() => navigate("/career-roadmap")}
+            icon={<RiRoadMapFill className="h-full w-full text-accentPrimary" />}
+            title="Career Roadmap"
+          />
+          <HighlightCard
+            onClick={() => navigate("/mock_tests")}
+            icon={<PiExamFill className="h-full w-full text-accentPrimary" />}
+            title="Mock Tests"
+          />
+        </div>
+      </div>
+    </section>
+  );
 }
 
 export default FeatureHighlights;

@@ -1,23 +1,37 @@
-import FeatureHighlights from "./FeatureHighlights";
+import { useNavigate } from "react-router-dom";
 import HeroSearchbar from "./HeroSearchbar";
 
 function Hero() {
-  return <center className="bg-accentPrimary text-white font-heading py-9">
+  const navigate = useNavigate();
 
-    <div className="text-6xl my-4 font-logo">Conquer Law with Accredel</div>
-    <div className="text-3xl my-4 text-lightText">Explore colleges, crack exams, and build your legal career.</div>
+  return (
+    <section className="bg-accentPrimary text-white font-heading py-12 text-center">
+      <div className="text-5xl md:text-6xl my-4 font-logo">
+        Conquer Law with Accredel
+      </div>
+      <div className="text-2xl md:text-3xl my-4 text-lightText">
+        Explore colleges, crack exams, and build your legal career.
+      </div>
 
-    <HeroSearchbar />
+      <HeroSearchbar />
 
-    <div className="flex justify-center space-x-6">
+      <div className="flex justify-center gap-6 mt-8">
+        <button
+          onClick={() => navigate("/courses")}
+          className="bg-secondary hover:bg-amber-300 hover:shadow-lg text-primary text-lg md:text-xl px-6 py-2 rounded w-40 transition"
+        >
+          Explore Courses
+        </button>
 
-      <button className="bg-secondary hover:bg-amber-300 hover:cursor-pointer hover:shadow-lg text-primary text-xl w-2xs py-2 rounded inline-block">Explore Courses</button>
-
-      <button className="border-white hover:border-amber-300 hover:cursor-pointer hover:bg-amber-300 hover:shadow-lg hover:text-primary rounded text-secondary text-xl w-2xs py-2  border-2 inline-block">Mock Tests</button>
-
-    </div>
-
-  </center>
+        <button
+          onClick={() => navigate("/mock_tests")}
+          className="border-2 border-white hover:border-amber-300 hover:bg-amber-300 hover:text-primary hover:shadow-lg text-secondary text-lg md:text-xl px-6 py-2 rounded w-40 transition"
+        >
+          Mock Tests
+        </button>
+      </div>
+    </section>
+  );
 }
 
 export default Hero;

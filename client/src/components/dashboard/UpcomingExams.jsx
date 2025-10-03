@@ -1,19 +1,27 @@
 function UpcomingExams({ exams }) {
-  return (
-    <div className="bg-white p-4 rounded shadow">
-      <h3 className="text-xl font-bold font-heading mb-4">Upcoming Exams</h3>
+  const safeExams = Array.isArray(exams) ? exams : [];
 
-      {(!exams || exams.length === 0) ? (
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-4">Upcoming Exams</h2>
+
+      {safeExams.length === 0 ? (
         <p>No upcoming exams.</p>
       ) : (
-        <ul className="space-y-2">
-          {exams.map((exam) => (
-            <li key={exam.id} className="border-b pb-2">
-              <p className="font-semibold">{exam.name}</p>
-              <p className="text-sm text-neutralText">{exam.date}</p>
-            </li>
+        <div className="flex flex-wrap gap-4">
+          {safeExams.map((exam) => (
+            <div
+              key={exam.id}
+              className="bg-white shadow rounded p-4 w-72 flex flex-col justify-between hover:shadow-lg transition"
+            >
+              <p className="font-semibold text-lg">{exam.name}</p>
+              <p className="text-sm text-neutralText mt-1">Date: {exam.date}</p>
+              {exam.location && (
+                <p className="text-sm text-neutralText mt-1">Location: {exam.location}</p>
+              )}
+            </div>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

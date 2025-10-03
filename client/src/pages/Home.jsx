@@ -1,23 +1,27 @@
-import FeatureHighlights from "../components/FeatureHighlights"
-import Footer from "../components/Footer"
-import Hero from "../components/Hero"
-import Navbar from "../components/Navbar"
-import Testimonials from "../components/Testimonials"
+import FeatureHighlights from "../components/FeatureHighlights";
+import Footer from "../components/Footer";
+import Hero from "../components/Hero";
+import Navbar from "../components/Navbar";
+import Testimonials from "../components/Testimonials";
 
-function Home(){
+function Home() {
   return (
-    <center className="bg-background">
+    <div className="bg-background">
       <Navbar />
 
+      {/* Hero */}
       <Hero />
 
+      {/* Features */}
       <FeatureHighlights />
 
+      {/* Testimonials */}
       <Testimonials />
 
+      {/* Footer */}
       <Footer />
-    </center>
-  )
+    </div>
+  );
 }
 
 export default Home;
