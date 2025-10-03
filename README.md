@@ -36,30 +36,6 @@ This repository contains a full-stack web application with separate `frontend` (
 * bcrypt for passwords
 * Multer for image upload
 
-## 📁 Repository Layout
-
-```
-lexpath/
-├─ backend/
-│  ├─ src/
-│  │  ├─ controllers/
-│  │  ├─ models/
-│  │  ├─ routes/
-│  │  ├─ middleware/
-│  │  ├─ utils/
-│  │  └─ index.js
-│  ├─ migrations/
-│  └─ package.json
-├─ frontend/
-│  ├─ src/
-│  │  ├─ components/
-│  │  ├─ pages/
-│  │  ├─ hooks/
-│  │  └─ App.jsx
-│  └─ package.json
-└─ README.md
-```
-
 ## 🛠 Getting Started (Developer)
 
 > Clone the repo and run the backend & frontend locally.
