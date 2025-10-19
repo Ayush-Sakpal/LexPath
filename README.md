@@ -43,7 +43,7 @@ This repository contains a full-stack web application with separate `frontend` (
 ### 1) Clone
 
 ```bash
-git clone https://github.com/your-username/lexpath.git
+git clone https://github.com/Ayush-Sakpal/lexpath.git
 cd lexpath
 ```
 
